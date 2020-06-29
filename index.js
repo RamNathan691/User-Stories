@@ -1,11 +1,14 @@
 const express = require('express')
 const path = require('path')
+const mongoose = require('mongoose')
 const dotenv = require('dotenv')
 const connectDB = require('./config/db')
 const morgan = require('morgan')
 const exphbs = require('express-handlebars')
 const passport = require('passport')
 const session = require('express-session')
+const MongoStore = require('connect-mongo')(session)
+
 // Load config
 dotenv.config({ path: './config/config.env' })
 // connecting Database
@@ -31,8 +34,9 @@ app.set('view engine', '.hbs')
 app.use(session({
   secret: 'ababababab',
   resave: false,
-  saveUnintialized: false
- 
+  saveUnintialized: false,
+  store: new MongoStore({ mongooseConnection: mongoose.connection })
+
 }))
 // ------------------------------------
 // Passport Middleware
@@ -41,7 +45,7 @@ app.use(passport.session())
 // ------------------------------------
 // Adding the routes ----------------
 app.use('/', require('./routes/index'))
-app.use('/auth',require('./routes/auth'))
+app.use('/auth', require('./routes/auth'))
 // -----------------------------------
 const PORT = process.env.PORT || 5000
 app.listen(
